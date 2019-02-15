@@ -1,6 +1,7 @@
 import { User } from './user.model'
-import { AuthenticationError } from 'apollo-server'
+import { AuthenticationError, ForbiddenError } from 'apollo-server'
 import { newApiKey } from '../../utils/auth'
+import bcrypt from 'bcrypt'
 
 const me = (_, args, ctx) => {
   if (!ctx.user) {
@@ -24,12 +25,32 @@ const signup = (_, args) => {
   return User.create({ ...args.input, apiKey: newApiKey() })
 }
 
+const login = async (_, args, ctx) => {
+  let user = await User.findOne({ email: args.input.email }, function (err, result) {
+    if (err) {
+      return err;
+    }
+    return result;
+  })
+  if (user == null) {
+    return new AuthenticationError()
+  }
+  return user.checkPassword(args.input.password)
+    .then(same => {
+      if (same) {
+        return user;
+      }
+      return new AuthenticationError()
+    })
+}
+
 export default {
   Query: {
     me
   },
   Mutation: {
     updateMe,
-    signup
+    signup,
+    login
   }
 }

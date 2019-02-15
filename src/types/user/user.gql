@@ -20,7 +20,14 @@ input UpdateUserInput {
   role: String
 }
 
+input LoginUserInput {
+  email: String
+  password: String
+}
+
+
 type Mutation {
   signup(input: NewUserInput!): User!
   updateMe(input: UpdateUserInput!): User!
+  login(input: LoginUserInput!): User!
 }

@@ -6,11 +6,10 @@ import mongoose from 'mongoose'
 import product from './types/product/product.resolvers'
 import coupon from './types/coupon/coupon.resolvers'
 import user from './types/user/user.resolvers'
-
+import config from './config'
 const types = ['product', 'coupon', 'user']
 
 export const start = async (connectionString) => {
-  console.log(connectionString);
   const rootSchema = `
     schema {
       query: Query
