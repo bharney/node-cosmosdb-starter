@@ -1,18 +1,37 @@
 import { start } from './server'
 import express from "express";
 import { config } from "dotenv"
+import webpack from 'webpack'
+import webpackDevMiddleware from 'webpack-dev-middleware'
+import webpackHotMiddleware from 'webpack-hot-middleware'
+import webConfig from '../webpack.config.js'
 
 config()
 
 start(process.env.ConnectionString)
 
 const app = express()
+const compiler = webpack(webConfig)
 
-app.get('/', async (req, res) => {
-    res.send("Hello World!");
-});
+app.use(webpackDevMiddleware(compiler, {
+    publicPath: webConfig.output.publicPath
+}))
 
-// Start the server, listen at port 3000 (-> http://127.0.0.1:3000/)
-// Also print a short info message to the console (visible in
-// the terminal window where you started the node server).
-app.listen(3001, () => console.log('Node.js listening on port 3001!'))
+app.use(webpackHotMiddleware(compiler))
+
+app.get('*', (req, res, next) => {
+    compiler.outputFileSystem.readFile('index.html', (err, result) => {
+        if (err) {
+            return next(err)
+        }
+        res.set('content-type', 'text/html')
+        res.send(result)
+        res.end()
+    })
+})
+
+const PORT = process.env.PORT || 8080
+
+app.listen(PORT, () => {
+    console.log(`App listening to ${PORT}...`)
+})

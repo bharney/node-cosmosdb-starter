@@ -39,7 +39,7 @@ userSchema.pre('save', function (next) {
     return next()
   }
 
-  bcrypt.hash(this.password, 8, (err, hash) => {
+  bcrypt.hash(this.password, bcrypt.genSaltSync(16), (err, hash) => {
     if (err) {
       return next(err)
     }
